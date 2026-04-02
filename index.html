@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dungeon Crawler</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game">
+        <!-- Top bar -->
+        <div id="topBar">
+            <div id="dungeonLevel">Dungeon Level 1</div>
+            <div id="turnCount">Turn 0</div>
+        </div>
+
+        <!-- Main canvas -->
+        <div id="canvasWrap">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Overlay for death/victory -->
+        <div id="overlay" hidden></div>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-row">
+                <div class="hp-bar-wrap">
+                    <div class="hp-bar" id="hpFill"></div>
+                    <span class="hp-text" id="hpText">30 / 30</span>
+                </div>
+            </div>
+            <div class="hud-row stats">
+                <span>LVL <strong id="statLevel">1</strong></span>
+                <span>ATK <strong id="statAtk">4</strong></span>
+                <span>DEF <strong id="statDef">2</strong></span>
+                <span>XP <strong id="statXp">0 / 15</strong></span>
+            </div>
+        </div>
+
+        <!-- Message log -->
+        <div id="messageLog"></div>
+
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="sidebar-section">
+                <h3>Map</h3>
+                <canvas id="minimap"></canvas>
+            </div>
+            <div class="sidebar-section">
+                <h3>Inventory</h3>
+                <div id="inventory"><div class="inv-empty">Empty</div></div>
+            </div>
+            <div class="sidebar-section">
+                <h3>Seed</h3>
+                <div class="seed-row">
+                    <input type="text" id="seedInput" value="" spellcheck="false">
+                    <button id="btnLoadSeed">Go</button>
+                </div>
+                <div class="seed-buttons">
+                    <button id="btnNewGame">New Game</button>
+                    <button id="btnCopyLink">Share Seed</button>
+                </div>
+            </div>
+            <div class="sidebar-section controls-help">
+                <h3>Controls</h3>
+                <div>Move: Arrows / WASD / hjkl</div>
+                <div>Diagonal: y u b n</div>
+                <div>Stairs: Enter</div>
+                <div>Wait: .</div>
+                <div>Items: 1-9</div>
+            </div>
+        </div>
+
+        <!-- Mobile D-pad -->
+        <div id="dpad">
+            <button id="dUp" class="dpad-btn" aria-label="Up">&uarr;</button>
+            <button id="dLeft" class="dpad-btn" aria-label="Left">&larr;</button>
+            <button id="dWait" class="dpad-btn dpad-center" aria-label="Wait">&middot;</button>
+            <button id="dRight" class="dpad-btn" aria-label="Right">&rarr;</button>
+            <button id="dDown" class="dpad-btn" aria-label="Down">&darr;</button>
+            <button id="dStairs" class="dpad-btn dpad-stairs" aria-label="Stairs">&gt;</button>
+        </div>
+    </div>
+
+    <script src="engine.js"></script>
+    <script src="game.js"></script>
+    <script src="renderer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
