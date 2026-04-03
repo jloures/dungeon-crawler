@@ -181,7 +181,7 @@ function generateLevel(dungeonLevel) {
 // ===== FOV =====
 
 function updateFOV() {
-    computeFOV(G.tiles, G.width, G.height, G.player.x, G.player.y, 8, G.visible);
+    computeFOV(G.tiles, G.width, G.height, G.player.x, G.player.y, 10, G.visible);
     for (let i = 0; i < G.visible.length; i++) {
         if (G.visible[i]) G.explored[i] = 1;
     }

@@ -1,13 +1,13 @@
 :root {
-    --bg: #0a0a0e;
-    --panel: #12121a;
-    --border: #1e1e2e;
-    --text: #c8c8d0;
-    --text-dim: #666680;
-    --accent: #4488ff;
-    --danger: #cc4444;
-    --success: #44aa44;
-    --gold: #ddaa44;
+    --bg: #0c0c12;
+    --panel: #161620;
+    --border: #2a2a3e;
+    --text: #dddde8;
+    --text-dim: #8888a0;
+    --accent: #5599ff;
+    --danger: #ee5555;
+    --success: #55cc55;
+    --gold: #ffcc44;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -112,10 +112,11 @@ body {
 
 .hp-bar-wrap {
     position: relative;
-    height: 22px;
-    background: #1a0808;
+    height: 24px;
+    background: #2a1010;
     border-radius: 4px;
     overflow: hidden;
+    border: 1px solid #442222;
 }
 
 .hp-bar {
@@ -141,20 +142,21 @@ body {
 .stats {
     display: flex;
     gap: 16px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-dim);
+    padding-top: 2px;
 }
-.stats strong { color: var(--text); }
+.stats strong { color: #fff; }
 
 /* ===== Message Log ===== */
 #messageLog {
     grid-area: log;
-    padding: 6px 12px;
+    padding: 8px 12px;
     background: var(--panel);
     border-top: 1px solid var(--border);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    max-height: 110px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    max-height: 120px;
     overflow-y: auto;
 }
 

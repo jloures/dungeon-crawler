@@ -35,14 +35,14 @@ const Renderer = {
         this.canvas.style.height = h + 'px';
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Calculate tile size to fit reasonably
-        const maxCols = 44;
-        this.tileSize = Math.max(14, Math.min(24, Math.floor(w / maxCols)));
+        // Larger tiles for readability — aim for ~30 visible columns
+        const maxCols = 34;
+        this.tileSize = Math.max(18, Math.min(28, Math.floor(w / maxCols)));
         this.viewCols = Math.floor(w / this.tileSize);
         this.viewRows = Math.floor(h / this.tileSize);
 
         // Minimap
-        const mScale = 2;
+        const mScale = 3;
         this.miniCanvas.width = G.width * mScale;
         this.miniCanvas.height = G.height * mScale;
     },
@@ -61,25 +61,11 @@ const Renderer = {
         this.offsetX = Math.max(0, Math.min(G.width - this.viewCols, this.offsetX));
         this.offsetY = Math.max(0, Math.min(G.height - this.viewRows, this.offsetY));
 
-        // Background
-        ctx.fillStyle = '#0a0a0e';
+        // Background (void)
+        ctx.fillStyle = '#08080c';
         ctx.fillRect(0, 0, w, h);
 
-        ctx.font = `bold ${ts - 2}px monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        const colors = {
-            wallBg: '#1a1a2e',
-            wallFg: '#333355',
-            floorBg: '#16161e',
-            floorFg: '#3a3a4a',
-            floorDot: '#2a2a3a',
-            exploredWall: '#111118',
-            exploredFloor: '#0f0f14',
-            stairsDown: '#44dddd',
-            stairsUp: '#dddd44',
-        };
+        const gap = 1; // gap between tiles for grid effect
 
         for (let vy = 0; vy < this.viewRows; vy++) {
             for (let vx = 0; vx < this.viewCols; vx++) {
@@ -96,44 +82,73 @@ const Renderer = {
 
                 const px = vx * ts;
                 const py = vy * ts;
+                const inner = ts - gap;
 
                 if (vis) {
                     if (tile === WALL) {
-                        ctx.fillStyle = colors.wallBg;
-                        ctx.fillRect(px, py, ts, ts);
-                        ctx.fillStyle = colors.wallFg;
-                        ctx.fillText('#', px + ts / 2, py + ts / 2);
+                        // Solid bright wall blocks
+                        ctx.fillStyle = '#3a3a5c';
+                        ctx.fillRect(px, py, inner, inner);
+                        // Subtle top/left highlight
+                        ctx.fillStyle = '#50508a';
+                        ctx.fillRect(px, py, inner, 2);
+                        ctx.fillRect(px, py, 2, inner);
                     } else if (tile === STAIRS_DOWN) {
-                        ctx.fillStyle = colors.floorBg;
-                        ctx.fillRect(px, py, ts, ts);
-                        ctx.fillStyle = colors.stairsDown;
-                        ctx.fillText('>', px + ts / 2, py + ts / 2);
+                        ctx.fillStyle = '#1e2a2e';
+                        ctx.fillRect(px, py, inner, inner);
+                        ctx.fillStyle = '#55ffee';
+                        ctx.font = `bold ${ts - 4}px monospace`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('>', px + inner / 2, py + inner / 2 + 1);
                     } else if (tile === STAIRS_UP) {
-                        ctx.fillStyle = colors.floorBg;
-                        ctx.fillRect(px, py, ts, ts);
-                        ctx.fillStyle = colors.stairsUp;
-                        ctx.fillText('<', px + ts / 2, py + ts / 2);
+                        ctx.fillStyle = '#2e2a1e';
+                        ctx.fillRect(px, py, inner, inner);
+                        ctx.fillStyle = '#ffee55';
+                        ctx.font = `bold ${ts - 4}px monospace`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('<', px + inner / 2, py + inner / 2 + 1);
                     } else {
-                        ctx.fillStyle = colors.floorBg;
-                        ctx.fillRect(px, py, ts, ts);
-                        ctx.fillStyle = colors.floorDot;
-                        ctx.fillText('\u00b7', px + ts / 2, py + ts / 2);
+                        // Floor — warm sandy tone
+                        ctx.fillStyle = '#28262e';
+                        ctx.fillRect(px, py, inner, inner);
+                        // Small center dot
+                        ctx.fillStyle = '#3d3a44';
+                        const dotR = Math.max(1.5, ts / 10);
+                        ctx.beginPath();
+                        ctx.arc(px + inner / 2, py + inner / 2, dotR, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                 } else {
-                    // Explored but not visible
-                    ctx.fillStyle = tile === WALL ? colors.exploredWall : colors.exploredFloor;
-                    ctx.fillRect(px, py, ts, ts);
+                    // Explored but not visible — dimmed versions
+                    if (tile === WALL) {
+                        ctx.fillStyle = '#1e1e2a';
+                        ctx.fillRect(px, py, inner, inner);
+                    } else {
+                        ctx.fillStyle = '#161620';
+                        ctx.fillRect(px, py, inner, inner);
+                    }
                 }
             }
         }
+
+        // Set font for glyphs
+        ctx.font = `bold ${ts - 4}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const inner = ts - gap;
 
         // Items (visible only)
         for (const item of G.items) {
             if (item.x < 0 || !G.visible[item.y * G.width + item.x]) continue;
             const sx = (item.x - this.offsetX) * ts;
             const sy = (item.y - this.offsetY) * ts;
+            // Glowing background
+            ctx.fillStyle = item.color + '22';
+            ctx.fillRect(sx + 2, sy + 2, inner - 4, inner - 4);
             ctx.fillStyle = item.color;
-            ctx.fillText(item.glyph, sx + ts / 2, sy + ts / 2);
+            ctx.fillText(item.glyph, sx + inner / 2, sy + inner / 2 + 1);
         }
 
         // Monsters (visible only)
@@ -141,30 +156,46 @@ const Renderer = {
             if (m.hp <= 0 || !G.visible[m.y * G.width + m.x]) continue;
             const sx = (m.x - this.offsetX) * ts;
             const sy = (m.y - this.offsetY) * ts;
-            ctx.fillStyle = '#1a0808';
-            ctx.fillRect(sx + 1, sy + 1, ts - 2, ts - 2);
+            // Dark background behind monster
+            ctx.fillStyle = '#1a0a0a';
+            ctx.fillRect(sx + 2, sy + 2, inner - 4, inner - 4);
+            // Colored border
+            ctx.strokeStyle = m.color + '88';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(sx + 2.5, sy + 2.5, inner - 5, inner - 5);
+            // Glyph
             ctx.fillStyle = m.color;
-            ctx.fillText(m.glyph, sx + ts / 2, sy + ts / 2);
+            ctx.fillText(m.glyph, sx + inner / 2, sy + inner / 2 + 1);
 
             // HP bar for damaged monsters
             if (m.hp < m.maxHp) {
                 const ratio = m.hp / m.maxHp;
-                const bw = ts - 4;
-                ctx.fillStyle = '#400';
-                ctx.fillRect(sx + 2, sy, bw, 2);
-                ctx.fillStyle = ratio > 0.5 ? '#4a4' : ratio > 0.25 ? '#aa4' : '#a44';
-                ctx.fillRect(sx + 2, sy, Math.round(bw * ratio), 2);
+                const bw = inner - 4;
+                ctx.fillStyle = '#600';
+                ctx.fillRect(sx + 2, sy + 1, bw, 3);
+                ctx.fillStyle = ratio > 0.5 ? '#4c4' : ratio > 0.25 ? '#cc4' : '#c44';
+                ctx.fillRect(sx + 2, sy + 1, Math.round(bw * ratio), 3);
             }
         }
 
-        // Player
+        // Player — bright and prominent
         {
             const sx = (G.player.x - this.offsetX) * ts;
             const sy = (G.player.y - this.offsetY) * ts;
-            ctx.fillStyle = '#1a1a0a';
-            ctx.fillRect(sx + 1, sy + 1, ts - 2, ts - 2);
-            ctx.fillStyle = G.player.color;
-            ctx.fillText('@', sx + ts / 2, sy + ts / 2);
+            // Glow effect
+            ctx.fillStyle = '#ffdd4422';
+            ctx.fillRect(sx - 2, sy - 2, inner + 4, inner + 4);
+            // Background
+            ctx.fillStyle = '#2a2810';
+            ctx.fillRect(sx + 1, sy + 1, inner - 2, inner - 2);
+            // Border
+            ctx.strokeStyle = '#ffdd44';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx + 2, sy + 2, inner - 4, inner - 4);
+            // Glyph
+            ctx.fillStyle = '#ffee66';
+            ctx.font = `bold ${ts - 2}px monospace`;
+            ctx.fillText('@', sx + inner / 2, sy + inner / 2 + 1);
         }
 
         this.renderMinimap();
@@ -172,8 +203,8 @@ const Renderer = {
 
     renderMinimap() {
         const mc = this.miniCtx;
-        const s = 2;
-        mc.fillStyle = '#0a0a0e';
+        const s = 3;
+        mc.fillStyle = '#08080c';
         mc.fillRect(0, 0, G.width * s, G.height * s);
 
         for (let y = 0; y < G.height; y++) {
@@ -181,12 +212,13 @@ const Renderer = {
                 const idx = y * G.width + x;
                 if (!G.explored[idx]) continue;
                 const tile = G.tiles[idx];
+                const vis = G.visible[idx];
                 if (tile === WALL) {
-                    mc.fillStyle = G.visible[idx] ? '#222238' : '#15151e';
+                    mc.fillStyle = vis ? '#3a3a5c' : '#1e1e2a';
                 } else if (tile === STAIRS_DOWN) {
-                    mc.fillStyle = '#2aa';
+                    mc.fillStyle = '#44ccbb';
                 } else {
-                    mc.fillStyle = G.visible[idx] ? '#2a2a35' : '#18181e';
+                    mc.fillStyle = vis ? '#33303a' : '#1a1a22';
                 }
                 mc.fillRect(x * s, y * s, s, s);
             }
@@ -195,13 +227,21 @@ const Renderer = {
         // Monsters on minimap (visible only)
         for (const m of G.monsters) {
             if (m.hp > 0 && G.visible[m.y * G.width + m.x]) {
-                mc.fillStyle = '#f44';
+                mc.fillStyle = '#ff5555';
                 mc.fillRect(m.x * s, m.y * s, s, s);
             }
         }
 
-        // Player on minimap
-        mc.fillStyle = '#fff';
-        mc.fillRect(G.player.x * s, G.player.y * s, s, s);
+        // Items on minimap (visible only)
+        for (const it of G.items) {
+            if (it.x >= 0 && G.visible[it.y * G.width + it.x]) {
+                mc.fillStyle = '#ffcc44';
+                mc.fillRect(it.x * s, it.y * s, s, s);
+            }
+        }
+
+        // Player on minimap — bright and large
+        mc.fillStyle = '#ffee44';
+        mc.fillRect(G.player.x * s - 1, G.player.y * s - 1, s + 2, s + 2);
     }
 };
